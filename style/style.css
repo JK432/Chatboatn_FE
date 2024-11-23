@@ -1,0 +1,16 @@
+.message{
+    padding: 3px;
+}
+.message .heading1{
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.message .heading2{
+    padding-top: 5px;
+    font-size: 1em;
+    font-weight: normal;
+}
+.message .link{
+    padding-top: 5px;
+    font-size: 1em;
+}
