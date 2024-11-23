@@ -15,6 +15,7 @@ const env = {
     "NEARBY_HOSPITAL":"nearby_hospital",
     "OTHER_QUERIES":"other_queries"
 };
+
 // UTILITY FUNCTIONS
 function isValidJSON(str) {
     try {
@@ -44,7 +45,7 @@ function restart_chat(botui) {
     }).then(() => {
         return botui.action.button({
             action: [
-                { text: 'Nearby Hospital', value: 'nearby_hospital' },
+                { text: 'Recommend Hospital', value: 'nearby_hospital' },
                 { text: 'Book an Appointment', value: 'appointment' },
                 { text: 'Other Queries', value: 'queries' }
             ]
@@ -502,7 +503,7 @@ botui.message.add({
 }).then(() => {
     return botui.action.button({
         action: [
-            { text: 'Nearby Hospital', value: 'nearby_hospital' },
+            { text: 'Recommend hospital', value: 'nearby_hospital' },
             { text: 'Book an Appointment', value: 'appointment' },
             { text: 'Other Queries', value: 'queries' }
         ]
