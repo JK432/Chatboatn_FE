@@ -54,40 +54,10 @@ function restart_chat(botui) {
             nearby_hospital(res);
         }
         else if (res.value === 'appointment') {
-            botui.message.add({
-                content: "Please provide hospital name, department, and preferred time slot:"
-            }).then(() => {
-                return botui.action.text({
-                    action: { placeholder: "Type details here (e.g., City Hospital, Cardiology, 10 AM)" }
-                });
-            }).then(res => {
-                // Example parsing (in production, split user input more robustly)
-                const [hospital_name, department, time_slot] = res.value.split(", ");
-                fetch('http://127.0.0.1:5000/book_appointment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hospital_name, department, time_slot })
-                }).then(response => response.json()).then(data => {
-                    botui.message.add({ content: data.response });
-                });
-            });
+            book_slot(res);
         }
         else if (res.value === 'queries') {
-            botui.message.add({
-                content: "Please type your query:"
-            }).then(() => {
-                return botui.action.text({
-                    action: { placeholder: "Type your question here" }
-                });
-            }).then(res => {
-                fetch('/other_queries', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: res.value })
-                }).then(response => response.json()).then(data => {
-                    botui.message.add({ content: data.response });
-                });
-            });
+
         }
     });
 }
@@ -183,6 +153,8 @@ function getSearchKeyword(botui) {
     });
 }
 
+function selectHospital(botui) {}
+
 
 
 // BUTTON FUNCTIONS
@@ -258,8 +230,9 @@ function nearby_hospital(res) {
 
 
 function book_slot() {
+
     const userdata_string = localStorage.getItem('user_data');
-    console.log((!isValidJSON(userdata_string)) || userdata_string == null);
+
     if((!isValidJSON(userdata_string)) || userdata_string == null){
         botui.message.add({
             content: "Please login by providing your phone number:"
@@ -306,37 +279,21 @@ function book_slot() {
                         })
 
                     }
+
                     if (data.status === "success") {
                         console.log(data)
                         localStorage.setItem('user_data', JSON.stringify(data.data));
                         let udata = localStorage.getItem('user_data');
                         console.log(JSON.parse(udata))
                         book_slot();
-
-                        // hospitals = []
-                        // data.data.forEach(item => {
-                        //     // console.log(n);
-                        //     hospitals.push({text: `(${item.distance.toFixed(1)} m) ${item.hospital.name}`, value:item.hospital},)
-                        // })
-                        //
-                        // console.log(hospitals)
-                        //
-                        // return botui.action.button({
-                        //     action:hospitals
-                        // }).then();
                     }
-                    // hospitals = data.data;
-                    // console.log(hospitals);
-                    // // botui.message.add({ content: data.response });
                 })
             });
             }
-
         )
 
     }else{
         const userdata = JSON.parse(userdata_string)
-        console.log(userdata)
         botui.message.add({ content: "Enter the search keyword for finding the hospital." });
         getSearchKeyword(botui).then((res)=>{
             fetch(`${env.ROOT}${env.SEARCH_HOSPITAL}?hospital=${res}`, {
@@ -349,19 +306,15 @@ function book_slot() {
                     return response.json();
                 }
             }).then(data => {
-                console.log(data)
                 if(data.status === "fail"){
                     botui.message.add({ content: data.message });
-                }if(data.status === "success"){
+                }
+                if(data.status === "success"){
                     botui.message.add({ content: data.message });
                     hospitals = []
-                    console.log(data.data)
                     data.data.forEach(item => {
                         hospitals.push({text: `${item.name}`, value:item},)
                     })
-
-                    console.log(hospitals)
-
                     return botui.action.button({
                         action:hospitals
                     }).then();
@@ -371,12 +324,10 @@ function book_slot() {
                 botui.message.add({
                     type: 'html',
                     content: `<div class="message"> 
-                                          <div class="heading1">${hospital.name}</div>
-                                          <div class="heading2">${hospital.place}</div>
-                                          <div class="link"><a href="https://www.google.com/maps?q=${hospital.lat},${hospital.lon}" target="_blank">View on Google Maps</a>
-                                          </div>
-                                   </div>`
-
+                                    <div class="heading1">${hospital.name}</div>
+                                    <div class="heading2">${hospital.place}</div>
+                                    <div class="link"><a href="https://www.google.com/maps?q=${hospital.lat},${hospital.lon}" target="_blank">View on Google Maps</a></div>
+                              </div>`
                 });
 
                 botui.message.add({
@@ -393,19 +344,17 @@ function book_slot() {
                             return response.json();
                         }
                     }).then(data => {
-                        console.log(data)
+
                         if (data.status === "fail") {
                             botui.message.add({content: data.message});
                         }
                         if (data.status === "success") {
                             botui.message.add({content: data.message});
                             departments = []
-                            console.log(data.data)
+
                             data.data.forEach(item => {
                                 departments.push({text: `${item.name}`, value: item},)
                             })
-
-                            console.log(departments)
 
                             return botui.action.button({
                                 action: departments
@@ -425,19 +374,19 @@ function book_slot() {
                                         return response.json();
                                     }
                                 }).then(data => {
-                                    console.log(data)
+
                                     if (data.status === "fail") {
                                         botui.message.add({content: data.message});
                                     }
                                     if (data.status === "success") {
                                         botui.message.add({content: data.message});
                                         doctors = []
-                                        console.log(data.data)
+
                                         data.data.forEach(item => {
                                             doctors.push({text: `Dr. ${item.name}`, value: item},)
                                         })
 
-                                        console.log(departments)
+
 
                                         return botui.action.button({
                                             action: doctors
@@ -522,38 +471,22 @@ function book_slot() {
 
                                                                 }
                                                             })
-                                                            // botui.message.add({
-                                                            //     content: `Select the Slot.`
-                                                            // })
-
-
                                                         });
 
                                                     }else {
                                                         return botui.message.add({content: 'Sorry all slots are filled.'});
                                                     }
-
-
                                                 }
                                             })
-
-
                                         });
                                     }
                                 })
-
                             });
                         }
                     })
-
-
                 }).then(()=>{
                     // restart_chat(botui);
                 });
-
-
-
-
             }).catch(error => {
                 // botui.message.add({ content: error });
             });
@@ -582,21 +515,7 @@ botui.message.add({
         book_slot(res);
     }
     else if (res.value === 'queries') {
-        botui.message.add({
-            content: "Please type your query:"
-        }).then(() => {
-            return botui.action.text({
-                action: { placeholder: "Type your question here" }
-            });
-        }).then(res => {
-            fetch('/other_queries', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: res.value })
-            }).then(response => response.json()).then(data => {
-                botui.message.add({ content: data.response });
-            });
-        });
+
     }
 });
 
